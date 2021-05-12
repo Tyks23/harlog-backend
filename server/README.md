@@ -90,4 +90,4 @@ CREATE TABLE participant (
 
 
 alter table users rename column name to username;
-alter table activity_instance add column incognito Boolean;
+alter table activity_instance add column numbkey TEXT;
