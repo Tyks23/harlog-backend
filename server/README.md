@@ -25,6 +25,13 @@ harlogusers
         group_id uuid FK
         activity_name TEXT
         incognito bool
+    
+    participant
+        part_id uuid PK
+        activity_id uuid FK
+        part_name TEXT
+        part_email  TEXT
+        answer Int Array
 
     
 
