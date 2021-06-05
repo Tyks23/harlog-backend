@@ -18,9 +18,10 @@ app.use(express.json());
 
 
   app.post(
-    '/register',  
-    body('email').isEmail(),
-    body('password').isLength({ min: 7 }),
+    '/register',
+    body('name').trim(),  
+    body('email').isEmail().trim().normalizeEmail(),
+    body('password').isLength({ min: 7 }).trim(),
     async(req, res) => {
        let body = req.body;
       // Finds the validation errors in this request and wraps them in an object with handy functions
@@ -124,6 +125,24 @@ app.post("/creategroup", async(req, res) => {
         let user = jwt.verify(token, secret);
         console.log(user);
         let query = await db.query(`Insert Into group_instance(group_name, user_id) Values ('${body.group_name}','${user.user_id}') Returning *`);
+        if(query.rows.length !== 0){
+            query = query.rows[0];
+            res.status(200).send(query);
+        }
+    }catch(e){
+        console.log(e);
+        res.status(403).send();
+    }
+});
+
+app.post("/createactivity", async(req, res) => {
+    let body = req.body;
+    let token = req.header('Authorization').split(' ')[1];
+    console.log(token);
+    try{
+        let user = jwt.verify(token, secret);
+        console.log(user);
+        let query = await db.query(`Insert Into activity_instance(activity_name, group_id,  incognito) Values ('${body.activity_name}', '${body.group_id}','${body.incognito}') Returning *`);
         if(query.rows.length !== 0){
             query = query.rows[0];
             res.status(200).send();
