@@ -17,11 +17,10 @@ app.use(express.json());
 });*/
 
 
-  app.post(
-    '/register',
+  app.post('/register',
     body('name').trim(),  
     body('email').isEmail().trim().normalizeEmail(),
-    body('password').isLength({ min: 7 }).trim(),
+    body('password').trim().isLength({ min: 7 }),
     async(req, res) => {
        let body = req.body;
       // Finds the validation errors in this request and wraps them in an object with handy functions
@@ -79,9 +78,9 @@ app.post("/sendanswer", async(req, res) => {
 
 app.post("/enterquiz", async(req, res) => {
     let body = req.body;
-
-        let query = await db.query(`Insert Into participant(part_name, part_email) Values ('${body.part_name}','${body.part_email}') Returning *`);
-        console.log(query);
+    console.log(body);
+        let query = await db.query(`Insert Into participant(activity_id, part_name, part_email) Values ('${body.activity_id}', '${body.part_name}','${body.part_email}') Returning *`);
+        
         if(query.rows.length !== 0){
         
             query = query.rows[0];
@@ -142,7 +141,7 @@ app.post("/createactivity", async(req, res) => {
     try{
         let user = jwt.verify(token, secret);
         console.log(user);
-        let query = await db.query(`Insert Into activity_instance(activity_name, group_id,  incognito) Values ('${body.activity_name}', '${body.group_id}','${body.incognito}') Returning *`);
+        let query = await db.query(`Insert Into activity_instance(activity_name, group_id,  incognito, roomkey) Values ('${body.activity_name}', '${body.group_id}','${body.incognito}', '${body.roomkey}') Returning *`);
         if(query.rows.length !== 0){
             query = query.rows[0];
             res.status(200).send();
@@ -158,11 +157,47 @@ app.get("/listgroup", async(req, res) => {
 
     try{
         let user = jwt.verify(token, secret);
-        let query = await db.query(`Select * From group_instance Where group_instance.user_id = '${user.user_id}'`);
+        let query = await db.query(`Select group_id, group_name From group_instance Where group_instance.user_id = '${user.user_id}'`);
         console.log(query);
         res.status(200).send(query.rows);
     }catch(e){
         console.log(e);
         res.status(403).send();
     }
+});
+
+app.post("/deleteroomkey", async(req, res) => {
+    let body = req.body;
+    let token = req.header('Authorization').split(' ')[1];
+    console.log(token);
+    try{
+        let user = jwt.verify(token, secret);
+        let query = await db.query(`Update activity_instance Set roomkey = '' Where roomkey = '${body.roomkey}' Returning *`);        
+        res.status(200).send();
+    }catch(e){
+        console.log(e);
+        res.status(403).send();
+    }
+});
+
+app.post("/getroomkey", async(req, res) => {
+    let body = req.body;   
+    
+    let query = await db.query(`Select activity_id From activity_instance Where activity_instance.roomkey = '${body.roomkey}'`);
+    
+    if(query.rows.length !== 0){
+        query = query.rows[0];
+        res.status(200).send(query);
+    }else {
+        res.status(404).send();
+    }
+    
+});
+
+app.post("/getactivities", async(req, res) => {
+    let body = req.body;
+   // let token = req.header('Authorization').split(' ')[1];
+        let query = await db.query(`Select participant.part_name From group_instance Join activity_instance On group_instance.group_id=activity_instance.group_id Join participant On activity_instance.activity_id=participant.activity_id Where group_instance.group_id = '${body.group_id}';`);        
+        res.status(200).send(query);   
+    
 });

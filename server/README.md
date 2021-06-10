@@ -89,5 +89,12 @@ CREATE TABLE participant (
 
 
 
-alter table users rename column name to username;
+alter table activity_instance rename column numbkey to roomkey;
 alter table activity_instance add column numbkey TEXT;
+
+ALTER TABLE activity_instance ALTER COLUMN roomkey SET DATA TYPE text;
+
+
+delete rookmey from activity_instance where activity_instance.roomkey =
+
+select participant.part_name from group_instance join activity_instance on group_instance.group_id=activity_instance.group_id join participant on activity_instance.activity_id=participant.activity_id where activity_instance.activity_id = 'fb908f86-2fd6-4973-a26d-45de15bcaec0';
