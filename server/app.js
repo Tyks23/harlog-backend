@@ -197,7 +197,7 @@ app.post("/getroomkey", async(req, res) => {
 app.post("/getactivities", async(req, res) => {
     let body = req.body;
    // let token = req.header('Authorization').split(' ')[1];
-        let query = await db.query(`Select participant.answer From group_instance Join activity_instance On group_instance.group_id=activity_instance.group_id Join participant On activity_instance.activity_id=participant.activity_id Where group_instance.group_id = '${body.group_id}';`);        
+        let query = await db.query(`Select activity_instance.activity_name, activity_instance.activity_id, participant.answer From group_instance Join activity_instance On group_instance.group_id=activity_instance.group_id Join participant On activity_instance.activity_id=participant.activity_id Where group_instance.group_id = '${body.group_id}';`);        
         res.status(200).send(query);   
     
 });
