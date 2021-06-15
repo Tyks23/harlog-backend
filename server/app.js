@@ -201,3 +201,20 @@ app.post("/getactivities", async(req, res) => {
         res.status(200).send(query);   
     
 });
+
+app.post("/getparticipants", async(req, res) => {
+    let body = req.body;
+   // let token = req.header('Authorization').split(' ')[1];
+        let query = await db.query(`Select part_id, part_name, answer From participant Where activity_id = '${body.activity_id}';`);        
+        res.status(200).send(query);   
+    
+});
+
+app.post("/getparticipantactivities", async(req, res) => {
+    let body = req.body;
+   // let token = req.header('Authorization').split(' ')[1];
+        let queryEmail = await db.query(`Select part_email From participant Where part_id = '${body.part_id}';`);
+        console.log(queryEmail);
+        let query = await db.query(`Select activity_instance.activity_id, activity_instance.activity_name, participant.answer From participant Join activity_instance On participant.activity_id=activity_instance.activity_id Where participant.part_email = '${queryEmail.rows[0].part_email}';`);        
+        res.status(200).send(query);      
+});
