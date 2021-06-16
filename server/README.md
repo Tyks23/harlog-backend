@@ -5,7 +5,54 @@ database:explorer otsing psql
 enter enter enter enter
 password: awesome99
 
+
+Andmebaasi koostamine:
+create database harlogusers;
+
 \c harlogusers
+
+CREATE TABLE users (
+    user_id uuid DEFAULT uuid_generate_v4 (),
+    name TEXT,
+    email TEXT,
+    password_hash TEXT,
+    PRIMARY KEY (user_id)
+);
+
+CREATE TABLE group_instance (
+    group_id uuid DEFAULT uuid_generate_v4 (),
+    user_id uuid,
+    group_name TEXT,
+    PRIMARY KEY (group_id),
+    CONSTRAINT fk_user
+      FOREIGN KEY(user_id) 
+	  REFERENCES users(user_id)
+);
+
+CREATE TABLE activity_instance (
+    activity_id uuid DEFAULT uuid_generate_v4 (),
+    group_id uuid,
+    activity_name TEXT,
+    roomkey TEXT,
+    PRIMARY KEY (activity_id),
+    CONSTRAINT fk_group
+      FOREIGN KEY(group_id) 
+	  REFERENCES group_instance(group_id)
+);
+
+CREATE TABLE participant (
+    part_id uuid DEFAULT uuid_generate_v4 (),
+    activity_id uuid,
+    part_name TEXT,
+    part_email TEXT,
+    answer Int [],
+    PRIMARY KEY (part_id),
+    CONSTRAINT fk_act
+      FOREIGN KEY(activity_id) 
+	  REFERENCES activity_instance(activity_id)
+);
+
+Sellega on andembaas seadistatud.
 
 
 harlogusers

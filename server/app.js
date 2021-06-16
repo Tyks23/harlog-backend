@@ -241,27 +241,31 @@ app.post("/listparticipants", async(req, res) => {
 });
 
 app.post("/getcomparisondata", async(req, res) => {
-    let body = req.body;
+    const {body} = req;
     let query;
-    switch(body.rowCount()) {
+    switch(Object.keys(body).length) {
         case 0:
             res.status(404).send();
+            break;
 
         case 1:
-            query = await db.query(`Select answers From participant 
+            console.log("TEST 1");
+            query = await db.query(`Select group_instance.group_id, group_name, answer From participant 
             Join activity_instance On participant.activity_id = activity_instance.activity_id 
-            Join group_activity On activity_instance.group_id=group_instance.group_id 
+            Join group_instance On activity_instance.group_id=group_instance.group_id 
             Where group_instance.group_id = '${body.group_id}'`);
-        
+            break;
         case 2:
-            query = await db.query(`Select answers From participant 
+            console.log("TEST 2");
+            query = await db.query(`Select activity_instance.group_id, activity_name, answer From participant 
             Join activity_instance On participant.activity_id = activity_instance.activity_id Where activity_instance.activity_id = '${body.activity_id}'`);
-        
+            break;
         case 3:
-            query = await db.query(`Select answers From participant Where part_id = '${body.part_id}'`);
-        
+            console.log("TEST 3");
+            query = await db.query(`Select part_id, part_name, answer From participant Where part_id = '${body.part_id}'`);
+            break;
         }
-    
+        console.log(query.rows);
     res.status(200).send(query);   
     
 });
