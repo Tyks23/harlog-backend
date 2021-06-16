@@ -197,7 +197,10 @@ app.post("/getroomkey", async(req, res) => {
 app.post("/getactivities", async(req, res) => {
     let body = req.body;
    // let token = req.header('Authorization').split(' ')[1];
-        let query = await db.query(`Select activity_instance.activity_name, activity_instance.activity_id, participant.answer From group_instance Join activity_instance On group_instance.group_id=activity_instance.group_id Join participant On activity_instance.activity_id=participant.activity_id Where group_instance.group_id = '${body.group_id}';`);        
+        let query = await db.query(`Select activity_instance.activity_name, activity_instance.activity_id, participant.answer From group_instance 
+        Join activity_instance On group_instance.group_id=activity_instance.group_id 
+        Join participant On activity_instance.activity_id=participant.activity_id Where group_instance.group_id = '${body.group_id}';`);      
+
         res.status(200).send(query);   
     
 });
@@ -215,6 +218,50 @@ app.post("/getparticipantactivities", async(req, res) => {
    // let token = req.header('Authorization').split(' ')[1];
         let queryEmail = await db.query(`Select part_email From participant Where part_id = '${body.part_id}';`);
         console.log(queryEmail);
-        let query = await db.query(`Select activity_instance.activity_id, activity_instance.activity_name, participant.answer From participant Join activity_instance On participant.activity_id=activity_instance.activity_id Where participant.part_email = '${queryEmail.rows[0].part_email}';`);        
+        let query = await db.query(`Select activity_instance.activity_id, activity_instance.activity_name, participant.answer From participant 
+        Join activity_instance On participant.activity_id=activity_instance.activity_id Where participant.part_email = '${queryEmail.rows[0].part_email}';`);
+
         res.status(200).send(query);      
+});
+
+app.post("/listactivities", async(req, res) => { 
+        
+        let body = req.body;
+        let query = await db.query(`Select activity_id, activity_name From activity_instance Where group_id = '${body.group_id}'`);
+        console.log(query);
+        res.status(200).send(query.rows);  
+});
+
+app.post("/listparticipants", async(req, res) => { 
+        
+    let body = req.body;
+    let query = await db.query(`Select part_id, part_name From participant Where activity_id = '${body.activity_id}'`);
+    console.log(query);
+    res.status(200).send(query.rows);  
+});
+
+app.post("/getcomparisondata", async(req, res) => {
+    let body = req.body;
+    let query;
+    switch(body.rowCount()) {
+        case 0:
+            res.status(404).send();
+
+        case 1:
+            query = await db.query(`Select answers From participant 
+            Join activity_instance On participant.activity_id = activity_instance.activity_id 
+            Join group_activity On activity_instance.group_id=group_instance.group_id 
+            Where group_instance.group_id = '${body.group_id}'`);
+        
+        case 2:
+            query = await db.query(`Select answers From participant 
+            Join activity_instance On participant.activity_id = activity_instance.activity_id Where activity_instance.activity_id = '${body.activity_id}'`);
+        
+        case 3:
+            query = await db.query(`Select answers From participant Where part_id = '${body.part_id}'`);
+        
+        }
+    
+    res.status(200).send(query);   
+    
 });
