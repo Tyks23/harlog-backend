@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./db.js");
 const jwt = require("jsonwebtoken");
+const md5 = require("md5");
 const secret = "0832c1202da8d382318e329a7c133ea0";
 let app = express();
 const { body, validationResult } = require('express-validator');
@@ -23,6 +24,7 @@ app.use(express.json());
     body('password').trim().isLength({ min: 7 }),
     async(req, res) => {
        let body = req.body;
+       
       // Finds the validation errors in this request and wraps them in an object with handy functions
       const errors = validationResult(req);
       let query1 = await db.query(`Select name From users Where name = '${body.name}';`);
@@ -36,7 +38,7 @@ app.use(express.json());
         return res.status(400).json({ errors: "email already in use" });
       }
       else{
-        await db.query(`Insert Into users(name, email, password_hash) Values ('${body.name}','${body.email}','${body.password}')`);
+        await db.query(`Insert Into users(name, email, password_hash) Values ('${body.name}','${body.email}','${md5(body.password)}')`);
         res.status(200).send();
       }
     });
@@ -44,7 +46,7 @@ app.use(express.json());
 
 app.post("/login", async(req, res) => {
     let body = req.body;
-    let query = await db.query(`Select * From users Where name = '${body.name}' AND password_hash = '${body.password}';`);
+    let query = await db.query(`Select * From users Where name = '${body.name}' AND password_hash = '${md5(body.password)}';`);
     if(query.rows.length !== 0){
         query = query.rows[0];
         let data = {
