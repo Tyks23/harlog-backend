@@ -7,6 +7,7 @@ const secret = "0832c1202da8d382318e329a7c133ea0";
 let app = express();
 const { body, validationResult } = require('express-validator');
 const { Query } = require("pg");
+express.static('../../harlog/client/public');
 
 app.use(cors());
 app.use(express.json());
@@ -109,13 +110,7 @@ app.get("/authorize", async(req, res) => {
     }
 });
 
-app.get("/", async(req, res) => {
-    let data = await db.query("Select * From users;")["rows"];
-    console.log(data);
-    res.send({
-        message: "Hello"
-    })
-});
+app.use("/", express.static("../../harlog/client/public"));
 app.listen(3000);
 
 app.post("/creategroup", async(req, res) => {
