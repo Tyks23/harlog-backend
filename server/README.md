@@ -3,7 +3,7 @@ node app.js
 
 database:explorer otsing psql
 enter enter enter enter
-password: awesome99
+
 
 
 Andmebaasi koostamine:
