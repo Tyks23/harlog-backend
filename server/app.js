@@ -138,7 +138,13 @@ app.post("/createactivity", async(req, res) => {
     try{
         let user = jwt.verify(token, secret);
         console.log(user);
-        let query = await db.query(`Insert Into activity_instance(activity_name, group_id,  incognito, roomkey) Values ('${body.activity_name}', '${body.group_id}','${body.incognito}', '${body.roomkey}') Returning *`);
+        let queryTest = await db.query(`Select activity_id From activity_instance where roomkey = ('${body.roomkey}')`);
+        if(queryTest.rows.length !== 0){
+            res.status(403).send();
+        }
+
+        let query = await db.query(`Insert Into activity_instance(activity_name, group_id,  incognito, roomkey) 
+        Values ('${body.activity_name}', '${body.group_id}','${body.incognito}', '${body.roomkey}') Returning *`);
         if(query.rows.length !== 0){
             query = query.rows[0];
             res.status(200).send();
@@ -216,7 +222,9 @@ app.post("/getparticipantactivities", async(req, res) => {
         let queryEmail = await db.query(`Select part_email From participant Where part_id = '${body.part_id}';`);
         console.log(queryEmail);
         let query = await db.query(`Select activity_instance.activity_id, activity_instance.activity_name, participant.answer From participant 
-        Join activity_instance On participant.activity_id=activity_instance.activity_id Where participant.part_email = '${queryEmail.rows[0].part_email}';`);
+        Join activity_instance On participant.activity_id=activity_instance.activity_id 
+        Join group_instance On activity_instance.group_id=group_instance.group_id
+        Where participant.part_email = '${queryEmail.rows[0].part_email}' And group_instance.group_id = '${body.group_id}';`);
 
         res.status(200).send(query);      
 });
