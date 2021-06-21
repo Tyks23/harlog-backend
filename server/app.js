@@ -143,8 +143,8 @@ app.post("/createactivity", async(req, res) => {
             res.status(403).send();
         }
 
-        let query = await db.query(`Insert Into activity_instance(activity_name, group_id,  incognito, roomkey) 
-        Values ('${body.activity_name}', '${body.group_id}','${body.incognito}', '${body.roomkey}') Returning *`);
+        let query = await db.query(`Insert Into activity_instance(activity_name, group_id, roomkey) 
+        Values ('${body.activity_name}', '${body.group_id}', '${body.roomkey}') Returning *`);
         if(query.rows.length !== 0){
             query = query.rows[0];
             res.status(200).send();
